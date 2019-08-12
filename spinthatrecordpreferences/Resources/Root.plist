@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>defaults</key>
+			<string>ca.menushka.spinthatrecord.preferences</string>
+			<key>key</key>
+			<string>enabled</string>
+			<key>default</key>
+			<true/>
+			<key>label</key>
+			<string>Enabled</string>
+			<key>PostNotification</key>
+			<string>ca.menushka.spinthatrecord.preferences/ReloadPrefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>id</key>
+			<string>configsGroup</string>
+			<key>label</key>
+			<string>GENERAL_HEADER</string>
+			<key>footerText</key>
+			<string>GENERAL_FOOTER</string>
+			<key>isStaticText</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Spin Speed (Rotations per Second)</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSliderCell</string>
+			<key>defaults</key>
+			<string>ca.menushka.spinthatrecord.preferences</string>
+			<key>key</key>
+			<string>spinSpeed</string>
+			<key>default</key>
+			<real>0.1</real>
+			<key>min</key>
+			<real>0</real>
+			<key>max</key>
+			<real>5</real>
+			<key>showValue</key>
+			<true/>
+			<key>PostNotification</key>
+			<string>ca.menushka.spinthatrecord.preferences/ReloadPrefs</string>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>SpinThatRecord</string>
+</dict>
+</plist>

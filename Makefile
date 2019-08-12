@@ -1,9 +1,12 @@
 include $(THEOS)/makefiles/common.mk
 
-TWEAK_NAME = SpinTheRecord
-SpinTheRecord_FILES = Tweak.xm
+TWEAK_NAME = SpinThatRecord
+SpinThatRecord_FILES = $(wildcard *.xm)
+SpinThatRecord_EXTRA_FRAMEWORKS += Cephei
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 after-install::
 	install.exec "killall -9 Spotify"
+SUBPROJECTS += spinthatrecordpreferences
+include $(THEOS_MAKE_PATH)/aggregate.mk
