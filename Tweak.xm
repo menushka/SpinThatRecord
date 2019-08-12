@@ -23,6 +23,7 @@
 
 @interface SPTNowPlayingContentView
 @property (nonatomic, retain) NSMutableArray *contentCells;
+-(void)refreshContentCells;
 @end
 
 @interface SPTNowPlayingDefaultContentViewController
@@ -35,27 +36,40 @@
 -(void)getCoverArtImageView;
 @end
 
+SPTNowPlayingContentView *contentView;
+BOOL isVisible = NO;
 BOOL isPlaying = NO;
 
 %hook SPTNowPlayingContentView
 
+-(id)initWithFrame:(CGRect)arg1 viewModel:(id)arg2 imageLoaderFactory:(id)arg3 backgroundDelegate:(id)arg4 nowPlayingVideoManager:(id)arg5 {
+	contentView = %orig;
+	return contentView;
+}
+
 -(id)setContentCells:(id)arg1 {
 	id r = %orig;
+	[self refreshContentCells];
+	return r;
+}
 
+%new
+-(void)refreshContentCells {
+	HBLogDebug(@"REFRESH CALLED");
 	for (int i = 0; i < self.contentCells.count; i++) {
-		if (i == 2 && isPlaying) {
+		if (i == 2 && isPlaying && isVisible) {
 			[((SPTNowPlayingContentCell *)self.contentCells[i]).coverArtContent startRotation];
 		} else {
 			[((SPTNowPlayingContentCell *)self.contentCells[i]).coverArtContent stopRotation];
 		}
 	}
-
-	return r;
 }
 
 %end
 
 %hook SPTNowPlayingModel
+
+%property (nonatomic, retain) SPTNowPlayingContentView *contentView;
 
 -(void)player:(id)arg1 stateDidChange:(id)arg2 fromState:(id)arg3 {
     %orig;
@@ -66,6 +80,8 @@ BOOL isPlaying = NO;
 		HBLogDebug(@"PLAYING NO");
 		isPlaying = NO;
 	}
+	HBLogDebug(@"%@", contentView);
+	[contentView refreshContentCells];
 }
 
 %end
@@ -74,40 +90,16 @@ BOOL isPlaying = NO;
 
 %property (nonatomic, retain) SPTNowPlayingContentView *contentView;
 
--(void)viewWillAppear:(BOOL)animated {
-	%log;
-	%orig;
-	[self getCoverArtImageView];
-}
-
 -(void)viewDidAppear:(BOOL)animated {
-	%log;
 	%orig;
-	HBLogDebug(@"%@", isPlaying ? @"YES" : @"NO");
-	if (self.contentView) {
-		if (isPlaying) {
-			[((SPTNowPlayingContentCell *)self.contentView.contentCells[2]).coverArtContent startRotation];
-		} else {
-			[((SPTNowPlayingContentCell *)self.contentView.contentCells[2]).coverArtContent stopRotation];
-		}
-	}
+	isVisible = YES;
+	[contentView refreshContentCells];
 }
 
--(void)player:(id)arg1 stateDidChange:(SPTPlayerState *)arg2 fromState:(SPTPlayerState *)arg3 {
+-(void)viewWillDisappear:(BOOL)animated {
 	%orig;
-	if (self.contentView) {
-		if (isPlaying) {
-			[((SPTNowPlayingContentCell *)self.contentView.contentCells[2]).coverArtContent startRotation];
-		} else {
-			[((SPTNowPlayingContentCell *)self.contentView.contentCells[2]).coverArtContent stopRotation];
-		}
-	}
-}
-
-%new
--(void)getCoverArtImageView {
-	SPTNowPlayingDefaultContentViewController *defaultViewController = self.contentViewController;
-	self.contentView = defaultViewController.contentView;
+	isVisible = NO;
+	[contentView refreshContentCells];
 }
 
 %end
@@ -156,10 +148,9 @@ BOOL isPlaying = NO;
 -(void)cachedRotation {
 	self.rotationAnimation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
 	self.rotationAnimation.fromValue = [NSNumber numberWithFloat:0];
-	self.rotationAnimation.toValue = [NSNumber numberWithFloat:(2*M_PI)];
+	self.rotationAnimation.toValue = [NSNumber numberWithFloat:(2 * M_PI)];
 	self.rotationAnimation.duration = 10.0f;
 	self.rotationAnimation.repeatCount = INFINITY;
-	self.rotationAnimation.cumulative = YES;
 	self.spinning = NO;
 }
 
@@ -168,17 +159,21 @@ BOOL isPlaying = NO;
 	if (self.spinning) return;
 	self.spinning = YES;
 
-	HBLogDebug(@"SPINNING START");
 	if (![self.layer animationForKey:SPIN_THE_RECORD_ANIMATION_KEY]) {
+		HBLogDebug(@"SPINNING START: ADD");
 		[self.layer addAnimation:self.rotationAnimation forKey:SPIN_THE_RECORD_ANIMATION_KEY];
-	} else {
-		CFTimeInterval pausedTime = [self.layer timeOffset];
-		self.layer.speed = 1.0;
-		self.layer.timeOffset = 0.0;
-		self.layer.beginTime = 0.0;
-		CFTimeInterval timeSincePause = [self.layer convertTime:CACurrentMediaTime() fromLayer:nil] - pausedTime;
-		self.layer.beginTime = timeSincePause;
-	}
+
+		CFTimeInterval pausedTime = [self.layer convertTime:CACurrentMediaTime() fromLayer:nil];
+		self.layer.speed = 0.0;
+		self.layer.timeOffset = pausedTime;
+	} 
+	HBLogDebug(@"SPINNING START: RESUME");
+	CFTimeInterval pausedTime = [self.layer timeOffset];
+	self.layer.speed = 1.0;
+	self.layer.timeOffset = 0.0;
+	self.layer.beginTime = 0.0;
+	CFTimeInterval timeSincePause = [self.layer convertTime:CACurrentMediaTime() fromLayer:nil] - pausedTime;
+	self.layer.beginTime = timeSincePause;
 }
 
 %new
