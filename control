@@ -1,9 +1,9 @@
-Package: ca.menushka.spintherecord
-Name: SpinTheRecord
+Package: ca.menushka.spinthatrecord
+Name: SpinThatRecord
 Depends: mobilesubstrate
-Version: 0.0.1
+Version: 1.0.0
 Architecture: iphoneos-arm
-Description: An awesome MobileSubstrate tweak!
+Description: Make your Spotify album art transform into a spinning record.
 Maintainer: Menushka Weeratunga
 Author: Menushka Weeratunga
 Section: Tweaks

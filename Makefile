@@ -1,7 +1,8 @@
 include $(THEOS)/makefiles/common.mk
 
-TWEAK_NAME = SpinTheRecord
-SpinTheRecord_FILES = $(wildcard *.xm)
+TWEAK_NAME = SpinThatRecord
+SpinThatRecord_FILES = $(wildcard *.xm)
+SpinThatRecord_EXTRA_FRAMEWORKS += Cephei
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 

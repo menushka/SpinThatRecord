@@ -1,4 +1,4 @@
-#define SPIN_THE_RECORD_ANIMATION_KEY @"SpinTheRecordAnimation"
+#define SPIN_THE_RECORD_ANIMATION_KEY @"SpinThatRecordAnimation"
 
 @interface SPTPlayerState
 -(BOOL)isBuffering;
@@ -7,9 +7,7 @@
 -(BOOL)isPlaying;
 @end
 
-@interface SPTNowPlayingCoverArtImageContentView : UIImageView {
-	id _storage;
-}
+@interface SPTNowPlayingCoverArtImageContentView : UIImageView
 @property (nonatomic, retain) CABasicAnimation *rotationAnimation;
 @property (assign) BOOL spinning;
 -(void)cachedRotation;
@@ -24,16 +22,6 @@
 @interface SPTNowPlayingContentView
 @property (nonatomic, retain) NSMutableArray *contentCells;
 -(void)refreshContentCells;
-@end
-
-@interface SPTNowPlayingDefaultContentViewController
-@property (nonatomic, retain) SPTNowPlayingContentView *contentView;
-@end
-
-@interface SPTNowPlayingViewController : UIViewController
-@property (nonatomic, retain) SPTNowPlayingContentView *contentView;
-@property (nonatomic, retain) SPTNowPlayingDefaultContentViewController *contentViewController;
--(void)getCoverArtImageView;
 @end
 
 SPTNowPlayingContentView *contentView;
