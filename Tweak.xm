@@ -1,4 +1,10 @@
+#import <Cephei/HBPreferences.h>
+
 #define SPIN_THE_RECORD_ANIMATION_KEY @"SpinThatRecordAnimation"
+
+HBPreferences *prefs;
+BOOL prefEnabled;
+float prefSpinSpeed;
 
 @interface SPTPlayerState
 -(BOOL)isBuffering;
@@ -27,6 +33,8 @@
 SPTNowPlayingContentView *contentView;
 BOOL isVisible = NO;
 BOOL isPlaying = NO;
+
+%group SpinThatRecordEnabled
 
 %hook SPTNowPlayingContentView
 
@@ -137,7 +145,7 @@ BOOL isPlaying = NO;
 	self.rotationAnimation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
 	self.rotationAnimation.fromValue = [NSNumber numberWithFloat:0];
 	self.rotationAnimation.toValue = [NSNumber numberWithFloat:(2 * M_PI)];
-	self.rotationAnimation.duration = 10.0f;
+	self.rotationAnimation.duration = 1.0f / prefSpinSpeed;
 	self.rotationAnimation.repeatCount = INFINITY;
 	self.spinning = NO;
 }
@@ -176,3 +184,21 @@ BOOL isPlaying = NO;
 }
 
 %end
+
+%end
+
+void loadPrefs() {
+	prefs = [[HBPreferences alloc] initWithIdentifier:@"ca.menushka.spinthatrecord.preferences"];
+
+	prefEnabled = [prefs boolForKey:@"enabled" default:YES];
+	prefSpinSpeed = [prefs floatForKey:@"spinSpeed" default:0.1];
+}
+
+%ctor {
+	loadPrefs();
+	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("ca.menushka.spinthatrecord.preferences/ReloadPrefs"), NULL, kNilOptions);
+
+	if (prefEnabled) {
+		%init(SpinThatRecordEnabled);
+	}
+}

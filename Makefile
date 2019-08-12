@@ -8,3 +8,5 @@ include $(THEOS_MAKE_PATH)/tweak.mk
 
 after-install::
 	install.exec "killall -9 Spotify"
+SUBPROJECTS += spinthatrecordpreferences
+include $(THEOS_MAKE_PATH)/aggregate.mk
