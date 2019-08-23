@@ -1,4 +1,5 @@
 #import <Cephei/HBPreferences.h>
+#import "MWRecordCALayer.h"
 
 #define SPIN_THE_RECORD_ANIMATION_KEY @"SpinThatRecordAnimation"
 
@@ -53,10 +54,12 @@ BOOL isPlaying = NO;
 -(void)refreshContentCells {
 	HBLogDebug(@"REFRESH CALLED");
 	for (int i = 0; i < self.contentCells.count; i++) {
+		SPTNowPlayingCoverArtImageContentView *coverARtContent = ((SPTNowPlayingContentCell *)self.contentCells[i]).coverArtContent;
+		MWRecordCALayer *layer = (MWRecordCALayer *)coverARtContent.layer;
 		if (i == 2 && isPlaying && isVisible) {
-			[((SPTNowPlayingContentCell *)self.contentCells[i]).coverArtContent startRotation];
+			[layer startRotation];
 		} else {
-			[((SPTNowPlayingContentCell *)self.contentCells[i]).coverArtContent stopRotation];
+			[layer stopRotation];
 		}
 	}
 }
@@ -104,9 +107,8 @@ BOOL isPlaying = NO;
 
 -(void)layoutSubviews {
 	%orig;
-	self.coverArtContent.layer.cornerRadius = self.coverArtContent.frame.size.height / 2;
-	self.coverArtContent.layer.masksToBounds = YES;
-	self.coverArtContent.layer.borderWidth = 0;
+	MWRecordCALayer *layer = (MWRecordCALayer *)self.coverArtContent.layer;
+	[layer roundLayer];
 }
 
 %end
@@ -116,28 +118,32 @@ BOOL isPlaying = NO;
 %property (nonatomic, retain) CABasicAnimation *rotationAnimation;
 %property (assign) BOOL spinning;
 
--(id)initWithFrame:(CGRect)arg1 {
-	SPTNowPlayingCoverArtImageContentView *r = %orig;
-	[r cachedRotation];
-	return r;
-}
+// -(id)initWithFrame:(CGRect)arg1 {
+// 	SPTNowPlayingCoverArtImageContentView *r = %orig;
+// 	[r cachedRotation];
+// 	return r;
+// }
 
--(id)initWithCoder:(id)arg1 {
-	SPTNowPlayingCoverArtImageContentView *r = %orig;
-	[r cachedRotation];
-	return r;
-}
+// -(id)initWithCoder:(id)arg1 {
+// 	SPTNowPlayingCoverArtImageContentView *r = %orig;
+// 	[r cachedRotation];
+// 	return r;
+// }
 
--(id)initWithImage:(id)arg1 {
-	SPTNowPlayingCoverArtImageContentView *r = %orig;
-	[r cachedRotation];
-	return r;
-}
+// -(id)initWithImage:(id)arg1 {
+// 	SPTNowPlayingCoverArtImageContentView *r = %orig;
+// 	[r cachedRotation];
+// 	return r;
+// }
 
--(id)initWithImage:(id)arg1 highlightedImage:(id)arg2 {
-	SPTNowPlayingCoverArtImageContentView *r = %orig;
-	[r cachedRotation];
-	return r;
+// -(id)initWithImage:(id)arg1 highlightedImage:(id)arg2 {
+// 	SPTNowPlayingCoverArtImageContentView *r = %orig;
+// 	[r cachedRotation];
+// 	return r;
+// }
+
+-(Class)_layerClass {
+    return %c(MWRecordCALayer);
 }
 
 %new
@@ -148,6 +154,9 @@ BOOL isPlaying = NO;
 	self.rotationAnimation.duration = 1.0f / prefSpinSpeed;
 	self.rotationAnimation.repeatCount = INFINITY;
 	self.spinning = NO;
+
+	MWRecordCALayer *layer = (MWRecordCALayer *)self.layer;
+	[layer roundLayer];
 }
 
 %new
