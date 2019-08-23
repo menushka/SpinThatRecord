@@ -13,6 +13,7 @@
     if (self) {
         subLayer = [[CALayer alloc] init];
         [self cacheRotation];
+		[self cutHole];
         [self addSublayer:subLayer];
     }
     return self;
@@ -25,18 +26,16 @@
 -(void)setFrame:(CGRect)arg1 {
     [super setFrame:arg1];
     [subLayer setFrame:CGRectMake(-arg1.size.width / 2, -arg1.size.height / 2, arg1.size.width, arg1.size.height)];
+	[self cutHole];
 }
 
 -(void)setBounds:(CGRect)arg1 {
     [super setBounds:CGRectMake(-arg1.size.width / 2, -arg1.size.height / 2, arg1.size.width, arg1.size.height)];
-    [subLayer setBounds:CGRectMake(0, 0, arg1.size.width, arg1.size.height)];
+    [subLayer setBounds:CGRectMake(-arg1.size.width / 2, -arg1.size.height / 2, arg1.size.width, arg1.size.height)];
+	[self cutHole];
 }
 
-// Override to block default value of YES from changing because Apple Music is stupid
--(void)setContinuousCorners:(BOOL)arg1 {}
-
 -(void)setCornerRadius:(CGFloat)arg1 {
-	HBLogDebug(@"ROUNDED: %@", rounded ? @"YES" : @"NO");
     if (rounded) {
         [subLayer setCornerRadius:self.bounds.size.height / 2];
     } else {
@@ -53,9 +52,24 @@
 }
 
 -(void)roundLayer {
-	HBLogDebug(@"roundLayer");
     rounded = YES;
     [self setCornerRadius:0];
+}
+
+-(void)cutHole {
+	if (!rounded) return;
+
+	float diameter = self.bounds.size.width;
+	float radius = self.bounds.size.height / 2;
+	float innerSize = diameter * 0.125f;
+	UIBezierPath *outerCircle = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(-diameter / 2, -diameter / 2, diameter, diameter) cornerRadius:radius];
+	UIBezierPath *innerCircle = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(0 - innerSize / 2, 0 - innerSize / 2, innerSize, innerSize) cornerRadius:innerSize / 2];
+	[outerCircle appendPath:innerCircle];
+
+	CAShapeLayer *maskLayer = [CAShapeLayer new];
+	maskLayer.fillRule = kCAFillRuleEvenOdd;
+	maskLayer.path = outerCircle.CGPath;
+	subLayer.mask = maskLayer;
 }
 
 -(void)cacheRotation {

@@ -8,6 +8,10 @@
 -(void)stopRotation;
 @end
 
+@interface MPAVController
+@end
+
+MPAVController *mpAVController;
 ArtworkComponentImageView *currentArtwork;
 
 %hook MusicNowPlayingContentView
@@ -46,11 +50,12 @@ ArtworkComponentImageView *currentArtwork;
 
 %new
 -(void)onPlayPausePressed {
-	MWRecordCALayer *layer = (MWRecordCALayer *)currentArtwork.layer;
+	// MWRecordCALayer *layer = (MWRecordCALayer *)currentArtwork.layer;
+	// HBLogDebug(@"MusicMiniPlayerViewController: %@", [contentManager nowPlayingViewControllerIsPlaying:self] ? @"YES" : @"NO");
 	// if (currentArtwork.spinning) {
 	// 	[layer stopRotation];
 	// } else {
-		[layer startRotation];
+	// 	[layer startRotation];
 	// }
 }
 
@@ -71,12 +76,33 @@ ArtworkComponentImageView *currentArtwork;
 
 %new
 -(void)onPlayPauseStopPressed {
-	MWRecordCALayer *layer = (MWRecordCALayer *)currentArtwork.layer;
+	// MWRecordCALayer *layer = (MWRecordCALayer *)currentArtwork.layer;
+	// HBLogDebug(@"MusicNowPlayingControlsViewController: %@", [contentManager nowPlayingViewControllerIsPlaying:self] ? @"YES" : @"NO");
 	// if (currentArtwork.spinning) {
 	// 	[layer stopRotation];
 	// } else {
-		[layer startRotation];
+	// 	[layer startRotation];
 	// }
+}
+
+%end
+
+%hook MPAVController
+
+-(id)init {
+	mpAVController = %orig;
+	return mpAVController;
+}
+
+-(BOOL)isPlaying {
+	BOOL playing = %orig;
+	MWRecordCALayer *layer = (MWRecordCALayer *)currentArtwork.layer;
+	if (playing) {
+		[layer startRotation];
+	} else {
+		[layer stopRotation];
+	}
+	return playing;
 }
 
 %end
