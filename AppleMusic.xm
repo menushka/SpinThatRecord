@@ -66,7 +66,6 @@ ArtworkComponentImageView *currentArtwork;
 %end
 
 %ctor {
-	HBLogDebug(@"APPLEMUSIC");
 	if ([MWConfig sharedInstance].enabled) {
 		%init(SpinThatRecordEnabled, ArtworkComponentImageView=objc_getClass("Music.ArtworkComponentImageView"), MusicNowPlayingContentView=objc_getClass("Music.NowPlayingContentView"));
 	}

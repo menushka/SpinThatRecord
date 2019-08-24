@@ -116,29 +116,28 @@ BOOL isPlaying = NO;
 
 %end
 
-%hook SPTNowPlayingCoverArtImageView
+// %hook SPTNowPlayingCoverArtImageView
 
--(Class)_layerClass {
-    return %c(MWRecordCALayer);
-}
+// -(Class)_layerClass {
+//     return %c(MWRecordCALayer);
+// }
 
-%end
+// %end
 
-%hook SpotifyAppDelegate
+// %hook SpotifyAppDelegate
 
-%new
-- (void)applicationWillEnterForeground:(UIApplication *)application {
-	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 4 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-		[contentView refreshContentCells];
-	});
-}
+// %new
+// - (void)applicationWillEnterForeground:(UIApplication *)application {
+// 	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 4 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+// 		[contentView refreshContentCells];
+// 	});
+// }
 
-%end
+// %end
 
 %end
 
 %ctor {
-	HBLogDebug(@"SPOTIFY");
 	if ([MWConfig sharedInstance].enabled) {
 		%init(SpinThatRecordEnabled);
 	}
