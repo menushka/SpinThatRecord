@@ -1,11 +1,6 @@
 #import <Cephei/HBPreferences.h>
+#import "MWConfig.h"
 #import "MWRecordCALayer.h"
-
-#define SPIN_THE_RECORD_ANIMATION_KEY @"SpinThatRecordAnimation"
-
-HBPreferences *prefs;
-BOOL prefEnabled;
-float prefSpinSpeed;
 
 @interface SPTPlayerState
 -(BOOL)isBuffering;
@@ -54,8 +49,8 @@ BOOL isPlaying = NO;
 -(void)refreshContentCells {
 	HBLogDebug(@"REFRESH CALLED");
 	for (int i = 0; i < self.contentCells.count; i++) {
-		SPTNowPlayingCoverArtImageContentView *coverARtContent = ((SPTNowPlayingContentCell *)self.contentCells[i]).coverArtContent;
-		MWRecordCALayer *layer = (MWRecordCALayer *)coverARtContent.layer;
+		SPTNowPlayingCoverArtImageContentView *coverArtContent = ((SPTNowPlayingContentCell *)self.contentCells[i]).coverArtContent;
+		MWRecordCALayer *layer = (MWRecordCALayer *)coverArtContent.layer;
 		if (i == 2 && isPlaying && isVisible) {
 			[layer startRotation];
 		} else {
@@ -115,99 +110,36 @@ BOOL isPlaying = NO;
 
 %hook SPTNowPlayingCoverArtImageContentView
 
-%property (nonatomic, retain) CABasicAnimation *rotationAnimation;
-%property (assign) BOOL spinning;
+-(Class)_layerClass {
+    return %c(MWRecordCALayer);
+}
 
-// -(id)initWithFrame:(CGRect)arg1 {
-// 	SPTNowPlayingCoverArtImageContentView *r = %orig;
-// 	[r cachedRotation];
-// 	return r;
-// }
+%end
 
-// -(id)initWithCoder:(id)arg1 {
-// 	SPTNowPlayingCoverArtImageContentView *r = %orig;
-// 	[r cachedRotation];
-// 	return r;
-// }
-
-// -(id)initWithImage:(id)arg1 {
-// 	SPTNowPlayingCoverArtImageContentView *r = %orig;
-// 	[r cachedRotation];
-// 	return r;
-// }
-
-// -(id)initWithImage:(id)arg1 highlightedImage:(id)arg2 {
-// 	SPTNowPlayingCoverArtImageContentView *r = %orig;
-// 	[r cachedRotation];
-// 	return r;
-// }
+%hook SPTNowPlayingCoverArtImageView
 
 -(Class)_layerClass {
     return %c(MWRecordCALayer);
 }
 
-%new
--(void)cachedRotation {
-	self.rotationAnimation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
-	self.rotationAnimation.fromValue = [NSNumber numberWithFloat:0];
-	self.rotationAnimation.toValue = [NSNumber numberWithFloat:(2 * M_PI)];
-	self.rotationAnimation.duration = 1.0f / prefSpinSpeed;
-	self.rotationAnimation.repeatCount = INFINITY;
-	self.spinning = NO;
+%end
 
-	MWRecordCALayer *layer = (MWRecordCALayer *)self.layer;
-	[layer roundLayer];
-}
+%hook SpotifyAppDelegate
 
 %new
--(void)startRotation {
-	if (self.spinning) return;
-	self.spinning = YES;
-
-	if (![self.layer animationForKey:SPIN_THE_RECORD_ANIMATION_KEY]) {
-		HBLogDebug(@"SPINNING START: ADD");
-		[self.layer addAnimation:self.rotationAnimation forKey:SPIN_THE_RECORD_ANIMATION_KEY];
-
-		CFTimeInterval pausedTime = [self.layer convertTime:CACurrentMediaTime() fromLayer:nil];
-		self.layer.speed = 0.0;
-		self.layer.timeOffset = pausedTime;
-	} 
-	HBLogDebug(@"SPINNING START: RESUME");
-	CFTimeInterval pausedTime = [self.layer timeOffset];
-	self.layer.speed = 1.0;
-	self.layer.timeOffset = 0.0;
-	self.layer.beginTime = 0.0;
-	CFTimeInterval timeSincePause = [self.layer convertTime:CACurrentMediaTime() fromLayer:nil] - pausedTime;
-	self.layer.beginTime = timeSincePause;
-}
-
-%new
--(void)stopRotation {
-	if (!self.spinning) return;
-	self.spinning = NO;
-
-	HBLogDebug(@"SPINNING STOP");
-	CFTimeInterval pausedTime = [self.layer convertTime:CACurrentMediaTime() fromLayer:nil];
-	self.layer.speed = 0.0;
-	self.layer.timeOffset = pausedTime;
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 4 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+		[contentView refreshContentCells];
+	});
 }
 
 %end
 
 %end
-
-void loadPrefs() {
-	prefs = [[HBPreferences alloc] initWithIdentifier:@"ca.menushka.spinthatrecord.preferences"];
-
-	prefEnabled = [prefs boolForKey:@"enabled" default:YES];
-	prefSpinSpeed = [prefs floatForKey:@"spinSpeed" default:0.1];
-}
 
 %ctor {
-	loadPrefs();
-	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("ca.menushka.spinthatrecord.preferences/ReloadPrefs"), NULL, kNilOptions);
-
-	if (prefEnabled) {
+	HBLogDebug(@"SPOTIFY");
+	if ([MWConfig sharedInstance].enabled) {
 		%init(SpinThatRecordEnabled);
 	}
 }

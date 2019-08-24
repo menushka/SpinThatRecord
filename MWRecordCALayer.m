@@ -1,3 +1,4 @@
+#import "MWConfig.h"
 #import "MWRecordCALayer.h"
 
 #define SPIN_THE_RECORD_ANIMATION_KEY @"SpinThatRecordAnimation"
@@ -61,7 +62,7 @@
 
 	float diameter = self.bounds.size.width;
 	float radius = self.bounds.size.height / 2;
-	float innerSize = diameter * 0.125f;
+	float innerSize = diameter * [MWConfig sharedInstance].innerCutout;
 	UIBezierPath *outerCircle = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(-diameter / 2, -diameter / 2, diameter, diameter) cornerRadius:radius];
 	UIBezierPath *innerCircle = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(0 - innerSize / 2, 0 - innerSize / 2, innerSize, innerSize) cornerRadius:innerSize / 2];
 	[outerCircle appendPath:innerCircle];
@@ -76,7 +77,7 @@
 	self.rotationAnimation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
 	self.rotationAnimation.fromValue = [NSNumber numberWithFloat:0];
 	self.rotationAnimation.toValue = [NSNumber numberWithFloat:(2 * M_PI)];
-	self.rotationAnimation.duration = 1.0f / 0.1;
+	self.rotationAnimation.duration = 1.0f / [MWConfig sharedInstance].spinSpeed;
 	self.rotationAnimation.repeatCount = INFINITY;
 }
 

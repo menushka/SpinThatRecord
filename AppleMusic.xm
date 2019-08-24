@@ -1,3 +1,4 @@
+#import "MWConfig.h"
 #import "MWRecordCALayer.h"
 
 @interface ArtworkComponentImageView : UIView
@@ -13,6 +14,8 @@
 
 MPAVController *mpAVController;
 ArtworkComponentImageView *currentArtwork;
+
+%group SpinThatRecordEnabled
 
 %hook MusicNowPlayingContentView
 
@@ -40,53 +43,6 @@ ArtworkComponentImageView *currentArtwork;
 -(void)onPlayPausePressed;
 @end
 
-%hook MusicMiniPlayerViewController
-
--(void)viewDidLoad {
-	%orig;
-	UIButton *button = [self playPauseButton];
-	[button addTarget:self action:@selector(onPlayPausePressed) forControlEvents:UIControlEventTouchUpInside];
-}
-
-%new
--(void)onPlayPausePressed {
-	// MWRecordCALayer *layer = (MWRecordCALayer *)currentArtwork.layer;
-	// HBLogDebug(@"MusicMiniPlayerViewController: %@", [contentManager nowPlayingViewControllerIsPlaying:self] ? @"YES" : @"NO");
-	// if (currentArtwork.spinning) {
-	// 	[layer stopRotation];
-	// } else {
-	// 	[layer startRotation];
-	// }
-}
-
-%end
-
-@interface MusicNowPlayingControlsViewController
--(id)playPauseStopButton;
--(void)onPlayPauseStopPressed;
-@end
-
-%hook MusicNowPlayingControlsViewController
-
--(void)viewDidLoad {
-	%orig;
-	UIButton *button = [self playPauseStopButton];
-	[button addTarget:self action:@selector(onPlayPauseStopPressed) forControlEvents:UIControlEventTouchUpInside];
-}
-
-%new
--(void)onPlayPauseStopPressed {
-	// MWRecordCALayer *layer = (MWRecordCALayer *)currentArtwork.layer;
-	// HBLogDebug(@"MusicNowPlayingControlsViewController: %@", [contentManager nowPlayingViewControllerIsPlaying:self] ? @"YES" : @"NO");
-	// if (currentArtwork.spinning) {
-	// 	[layer stopRotation];
-	// } else {
-	// 	[layer startRotation];
-	// }
-}
-
-%end
-
 %hook MPAVController
 
 -(id)init {
@@ -107,6 +63,11 @@ ArtworkComponentImageView *currentArtwork;
 
 %end
 
+%end
+
 %ctor {
-	%init(ArtworkComponentImageView=objc_getClass("Music.ArtworkComponentImageView"), MusicNowPlayingContentView=objc_getClass("Music.NowPlayingContentView"), MusicMiniPlayerViewController=objc_getClass("Music.MiniPlayerViewController"));
+	HBLogDebug(@"APPLEMUSIC");
+	if ([MWConfig sharedInstance].enabled) {
+		%init(SpinThatRecordEnabled, ArtworkComponentImageView=objc_getClass("Music.ArtworkComponentImageView"), MusicNowPlayingContentView=objc_getClass("Music.NowPlayingContentView"));
+	}
 }

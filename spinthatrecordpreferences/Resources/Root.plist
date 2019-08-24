@@ -58,6 +58,30 @@
 			<key>PostNotification</key>
 			<string>ca.menushka.spinthatrecord.preferences/ReloadPrefs</string>
 		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSStaticTextCell</string>
+			<key>label</key>
+			<string>Inner Cutout</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSliderCell</string>
+			<key>defaults</key>
+			<string>ca.menushka.spinthatrecord.preferences</string>
+			<key>key</key>
+			<string>innerCutout</string>
+			<key>default</key>
+			<real>0.125</real>
+			<key>min</key>
+			<real>0</real>
+			<key>max</key>
+			<real>1</real>
+			<key>showValue</key>
+			<true/>
+			<key>PostNotification</key>
+			<string>ca.menushka.spinthatrecord.preferences/ReloadPrefs</string>
+		</dict>
 	</array>
 	<key>title</key>
 	<string>SpinThatRecord</string>
